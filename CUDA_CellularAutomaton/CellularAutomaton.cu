@@ -25,6 +25,7 @@ CellularAutomaton::~CellularAutomaton(void)
 {
 	cudaFree(d_w);
 	cudaFree(d_nW);
+	cudaFree(d_pixels);
 }
 
 int CellularAutomaton::getGeneration()
@@ -59,7 +60,7 @@ void CellularAutomaton::reset()
 
 void CellularAutomaton::setCell(unsigned int x, unsigned int y, bool state)
 {
-	//updateHost();
+	updateHost();
 	if(x>0 && y>0 && x<WORLD_H+1 && y<WORLD_W+1)
 		world[(y+1)*(WORLD_W+2)+x+1] = state;
 
@@ -158,15 +159,13 @@ void CellularAutomaton::nextStep()
 
 	swapCells<<<nbBlock, blockSize>>>(d_w, d_nW, d_pixels);
 	cudaDeviceSynchronize();
-	
-	updateHost();
 
 	currentGen++;
 }
 
 void CellularAutomaton::updateHost()
 {
-	cudaMemcpy(world, d_nW, CELL_COUNT * sizeof(bool), cudaMemcpyDeviceToHost);
+	cudaMemcpy(world, d_w, CELL_COUNT * sizeof(bool), cudaMemcpyDeviceToHost);
 }
 
 void CellularAutomaton::updateDevice()
