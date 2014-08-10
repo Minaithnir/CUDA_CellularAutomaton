@@ -70,7 +70,10 @@ int main()
 
                 // Randomize each cell state
                 if(event.key.code == sf::Keyboard::R)
+				{
+					perfClock.restart();
                     gameOfLife.reset();
+				}
 
                 // Kill all cells
                 if(event.key.code == sf::Keyboard::C)
@@ -141,7 +144,7 @@ int main()
 		}
 
 
-		gameOfLife.draw(App);
+		//gameOfLife.draw(App);
 
 		// Update the window
 		App.display();

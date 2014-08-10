@@ -34,10 +34,10 @@ protected:
 	void updateDevice();
 	void updatePixels();
 
-	bool world[CELL_COUNT];
+	int world[CELL_COUNT];
 
-	bool* d_w;
-	bool* d_nW;
+	int* d_w;
+	int* d_nW;
 	sf::Uint8* d_pixels;
 	
 	unsigned int currentGen;
