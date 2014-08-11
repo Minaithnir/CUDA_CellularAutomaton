@@ -23,9 +23,11 @@ CellularAutomaton::CellularAutomaton(void)
 
 CellularAutomaton::~CellularAutomaton(void)
 {
+	std::cout << "exiting pattern" << std::endl;
 	cudaFree(d_w);
 	cudaFree(d_nW);
 	cudaFree(d_pixels);
+	std::cout << "freed device pointers" << std::endl;
 }
 
 int CellularAutomaton::getGeneration()
@@ -64,6 +66,24 @@ void CellularAutomaton::setCell(unsigned int x, unsigned int y, bool state)
 	if(x>0 && y>0 && x<WORLD_H+1 && y<WORLD_W+1)
 		world[(y+1)*(WORLD_W+2)+x+1] = state;
 
+	updateDevice();
+}
+
+void CellularAutomaton::setGrid(Pattern &pattern, sf::Vector2i position)
+{
+	updateHost();
+	int x,y;
+	for(int i=0; i<pattern.getSize().y; i++)
+		for(int j=0; j<pattern.getSize().x; j++)
+		{
+			x = i+position.x; y=j+position.y;
+			if(x>0 && y>0 && x<WORLD_H+1 && y<WORLD_W+1)
+			{
+				world[(y+1)*(WORLD_W+2)+x+1] = pattern.getGrid()[i*pattern.getSize().x+j];
+			}
+
+		}
+	
 	updateDevice();
 }
 
@@ -114,7 +134,7 @@ __global__ void computeCell(bool* world, bool* nextWorld)
 
 		// Regle du "Jeu de Vie"
 		//Born if 3 neighbours
-		if(nSum & RULE_B)
+		if(nSum & RULE_B && !world[i])
 			nextWorld[i] = true;
 		else if(nSum & RULE_S)
 			nextWorld[i] = world[i];

@@ -25,13 +25,18 @@ int main()
     CellularAutomaton gameOfLife;
 	int gen=0;
     bool pausedGame = false;
+	
+	
+	Pattern glider;
+	bool patternMode = false;
+	
 
     //View (pour zoom)
     sf::View zoomView;
     zoomView.setSize(WORLD_W / ZOOM_FRACTION, WORLD_H / ZOOM_FRACTION);
     bool zoom = false;
 
-        // Start the game loop
+    // Start the game loop
     while (App.isOpen())
     {
         // Process events
@@ -68,6 +73,14 @@ int main()
                     }
                 }
 
+				if(event.key.code == sf::Keyboard::Num1)
+                {
+                    if(patternMode)
+                        patternMode = false;
+                    else
+                        patternMode = true;
+                }
+
                 // Randomize each cell state
                 if(event.key.code == sf::Keyboard::R)
                     gameOfLife.reset();
@@ -95,20 +108,27 @@ int main()
             }
 
             // Change cell state according to mouse button
-            if(event.type == sf::Event::MouseButtonReleased && zoom)
+            if(event.type == sf::Event::MouseButtonReleased)
             {
                 sf::Vector2f mousePos =  App.mapPixelToCoords(sf::Mouse::getPosition(App));
 
                 mousePos.x = floor(mousePos.x);
                 mousePos.y = floor(mousePos.y);
-
-                if(event.mouseButton.button == sf::Mouse::Left)
-                    gameOfLife.setCell((int) mousePos.x, (int) mousePos.y, true);
-                if(event.mouseButton.button == sf::Mouse::Right)
-                    gameOfLife.setCell((int) mousePos.x, (int) mousePos.y, false);
+				if(patternMode && event.mouseButton.button == sf::Mouse::Left)
+				{
+					gameOfLife.setGrid(glider, sf::Vector2i((int)mousePos.x, (int)mousePos.y));
+				}
+				else
+				{
+					if(event.mouseButton.button == sf::Mouse::Left)
+						gameOfLife.setCell((int) mousePos.x, (int) mousePos.y, true);
+					if(event.mouseButton.button == sf::Mouse::Right)
+						gameOfLife.setCell((int) mousePos.x, (int) mousePos.y, false);
+				}
+                
             }
         }
-
+		
         if(zoom)
         {
             sf::Vector2i mousePos =  sf::Mouse::getPosition(App);
@@ -126,6 +146,7 @@ int main()
             App.setView(zoomView);
         }
 
+		
         if(!pausedGame)
             gameOfLife.nextStep();
 
@@ -143,9 +164,15 @@ int main()
 
 		gameOfLife.draw(App);
 
+		if(patternMode)
+		{
+            sf::Vector2f mousePos =  App.mapPixelToCoords(sf::Mouse::getPosition(App));
+			glider.draw(App, sf::Vector2i((int)mousePos.x, (int)mousePos.y));
+		}
+
 		// Update the window
 		App.display();
-		
+
 		elapsedTime = clock.getElapsedTime().asSeconds();
 		clock.restart();
     }
