@@ -18,11 +18,13 @@ class CellularAutomaton
 {
 public:
 	CellularAutomaton(void);
+	CellularAutomaton(int w, int h);
 	virtual ~CellularAutomaton(void);
 
+	void resize(int w, int h);
 	void reset();
 	void nextStep();
-	void setCell(unsigned int x, unsigned int y, bool state);
+	void setCell(int x, int y, bool state);
 	void clear(bool state);
 
 	void draw(sf::RenderWindow &window);
@@ -30,11 +32,11 @@ public:
 	int getGeneration();
 
 protected:
-	void updateHost();
-	void updateDevice();
-	void updatePixels();
 
-	bool world[CELL_COUNT];
+	int width;
+	int height;
+
+	bool* world;
 
 	bool* d_w;
 	bool* d_nW;
@@ -43,7 +45,20 @@ protected:
 	unsigned int currentGen;
 
     sf::Sprite sprite;
-    sf::Texture texture;
+    sf::Texture* texture;
     sf::Uint8 pixels[PIXELS_SIZE];
+
+	void updateHost();
+	void updateDevice();
+	void updatePixels();
+
+	int cellCount();
+	int pixelsCount();
+
+	void computeCell(bool* world, bool* nextWorld);
+	void swapCells(bool* world, bool* nextWorld, sf::Uint8* pixels);
+	void pixelsToHost(bool* world, sf::Uint8* pixels);
+
+	void createWorld(int w, int h);
 };
 
